@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import { Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 let Web3 = require('web3');
 
 function Index() {
@@ -6,6 +8,9 @@ function Index() {
   const [web3, setWeb3] = useState(null);
   const [address, setAddress] = useState(null);
   const [contract, setContract] = useState(null);
+  const [ethBalance, setethBalance] = useState(0);
+  const [otherBalance, setotherBalance] = useState(0);
+  const [networkSelect, setNetwork] = useState(null);
 
   let abi = [
     {
@@ -780,116 +785,208 @@ function Index() {
     }
   ] // Paste your ABI here
 
-  let contractAddress = "0xc472d90ccb58c1df3d6d290e8814232ccf06ef95" 
+  let testLocal = true;
+  let contractAddress = testLocal ? "0xbE10b68e255068359Ebb272D3564723eF0C496DD" : "0xc472d90ccb58c1df3d6d290e8814232ccf06ef95";
+  let web3Connect = testLocal ? 'http://localhost:7545' : 'wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63'
 
   useEffect(() => {
     window.ethereum ?
       ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts) => {
 
+        if(testLocal){
+          accounts[0] = '0xC2fe8d3fD9a6C6A1b7D6D2986fCAe2D5b861A667';
+        }
+
         console.log('getAccount:', accounts);
-        await setAddress(accounts[0]);
-        let w3 = new Web3('https://ropsten.infura.io/v3/6a33721938864557ad8f30daac2ccf63');
-        await setWeb3(w3);
+        
+        setOWnerAddress(accounts);
+        
+        // let w3 = await new Web3('wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63');
+
+        let w3 = await new Web3(web3Connect);
+        
+        setWeb3(w3);
 
         let c = new w3.eth.Contract(abi, contractAddress);
-        await setContract(c);
 
-        startApp();
+        console.log('Contract: ', c._address);
+        setContract(c._address);
+
+        startApp(w3, accounts, c);
 
       }).catch((err) => console.log(err))
     : console.log("Please install MetaMask")
   }, [])
 
-  // Get current network
-  function startApp() {
-    console.log('Start App');
-    console.log('Data: ', web3, address, contract);
-    web3.eth.net.getId().then(netId => {
-    // web3.version.getNetwork((err, netId) => {
-      console.log('netId: ' + netId)
-      switch (netId) {
-        case 1:
-            network = 'Mainnet';
-            networkDisplay = network;
-            warning = 'please switch your network to Kovan or Thai Chain';
-            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-            break
-        case 2:
-            network = 'Deprecated Morden';
-            networkDisplay = network;
-            warning = 'please switch your network to Kovan or Thai Chain';
-            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-            break
-        case 3:
-            network = 'Ropsten';
-            networkDisplay = network;
-            warning = 'please switch your network to Kovan or Thai Chain';
-            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-            break
-        case 4:
-            network = 'Rinkeby';
-            networkDisplay = network;
-            contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
-            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-            break
-        case 7:
-            network = 'Thai Chain';
-            networkDisplay = network;
-            contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
-            explorerUrl = "https://exp.tch.in.th/tx/"
-            break
-        case 42:
-            network = 'Kovan';
-            networkDisplay = network;
-            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-            break
-        case 1337:
-            network = 'Kovan - Optimism';
-            networkDisplay = '<strong>Kovan Optimism</strong><br/>(Level 2 Ethereum)';
-            contractAddress = '0xE6dCD042c4dDaC0f390A7B1CB8B4D60DD20b6338';
-            explorerUrl = "https://kovan-l2-explorer.surge.sh/tx/";
-            break
-        case 5777:
-            network = 'Ganache';
-            networkDisplay = network;
-            break
-        case KULAPBesuNetworkId:
-            network = 'KULAP Besu'
-            networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
-            contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
-            explorerUrl = "http://besu1.kulap.io/tx/";
-            break
-        default:
-            network = 'Unknown';
-            networkDisplay = network;
-            warning = 'please switch your network to Kovan or Thai Chain';
-      }
-      $("#eth_network").html(networkDisplay);
-      $("#warning").text(warning);
-      $("#candidateContractAddress").val(contractAddress);
-      
-      
-      web3.eth.getAccounts().then(accounts => {
-        userAccount = accounts[0];
-        $("#eth_address").text(userAccount);
+    function setOWnerAddress(accounts) {
+      console.log('Call setOWnerAddress');
+      setAddress(accounts[0], result =>{
+        console.log('Change Owner address');
+      });
+    }
 
-        reloadInfo();
+    // Get current network
+    function startApp(web3, accounts, c) {
+      console.log('Start App');
+      console.log('Data: ', web3, accounts[0], c);
+
+
+  
+      web3.eth.getBalance(accounts[0]).then( (balances) => {
+        let bn = web3.utils.fromWei(balances, "ether");
+        console.log('getBalance: ', bn);
+        setethBalance(Number(bn).toFixed(4));
+      });
+
+      c.methods.getBalance(contractAddress,accounts[0]).call({from: accounts[0]}, function(error, result){
+
+        if(error){
+          console.log(error);
+        }else{
+          console.log('getBalance TENT: ', result);
+          setotherBalance(result);
+        }
+        
+      });
+  
+      web3.eth.net.getId().then(netId => {
+
+        let network = '';
+        let networkDisplay = '';
+        let warning = '';
+        let explorerUrl = '';
+
+        console.log('netId: ' + netId);
+
+        switch (netId) {
+          case 1:
+              network = 'Mainnet';
+              networkDisplay = network;
+              warning = 'please switch your network to Kovan or Thai Chain';
+              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+              break
+          case 2:
+              network = 'Deprecated Morden';
+              networkDisplay = network;
+              warning = 'please switch your network to Kovan or Thai Chain';
+              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+              break
+          case 3:
+              network = 'Ropsten';
+              networkDisplay = network;
+              warning = 'please switch your network to Kovan or Thai Chain';
+              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+              break
+          case 4:
+              network = 'Rinkeby';
+              networkDisplay = network;
+              contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
+              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+              break
+          case 7:
+              network = 'Thai Chain';
+              networkDisplay = network;
+              contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
+              explorerUrl = "https://exp.tch.in.th/tx/"
+              break
+          case 42:
+              network = 'Kovan';
+              networkDisplay = network;
+              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+              break
+          case 1337:
+              network = 'Kovan - Optimism';
+              networkDisplay = '<strong>Kovan Optimism</strong><br/>(Level 2 Ethereum)';
+              contractAddress = '0xE6dCD042c4dDaC0f390A7B1CB8B4D60DD20b6338';
+              explorerUrl = "https://kovan-l2-explorer.surge.sh/tx/";
+              break
+          case 5777:
+              network = 'Ganache';
+              networkDisplay = network;
+              break
+          case KULAPBesuNetworkId:
+              network = 'KULAP Besu'
+              networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
+              contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
+              explorerUrl = "http://besu1.kulap.io/tx/";
+              break
+          default:
+              network = 'Unknown';
+              networkDisplay = network;
+              warning = 'please switch your network to Kovan or Thai Chain';
+        }
+        setNetwork(networkDisplay);
+        console.log('Network: ', networkDisplay);
       })
-    })
-  }
+    }
 
 
   return (
     <>
-    <div>
-      Welcome to your homepage
-    </div>
-    <div>
-      Your address : {address}
-    </div>
-    <div>
-      Contract address : {contract ? contract : 'xx' }
-    </div>
+    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+      <Container>
+      <Navbar.Brand href="#home">Tent Token</Navbar.Brand>
+      <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+      <Navbar.Collapse id="responsive-navbar-nav" style={{justifyContent: 'right'}}>
+        {/* <Nav className="me-auto">
+          <Nav.Link href="#features">Features</Nav.Link>
+          <Nav.Link href="#pricing">Pricing</Nav.Link>
+          <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
+            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+            <NavDropdown.Divider />
+            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
+          </NavDropdown>
+        </Nav> */}
+        <Nav>
+          <Nav.Link href="#deets">{address ? address : 'Not Connect'}</Nav.Link>
+        </Nav>
+      </Navbar.Collapse>
+      </Container>
+    </Navbar>
+    <Container>
+      <div style={{textAlign: 'center'}}>
+        <div>
+        <b>Contract address :</b> {contract ? contract : 'Not Connect' }
+        </div>
+        <Row>
+          <Col>
+            <Card >
+              <div>
+                <div>
+                  <b>dApps Network :</b> {networkSelect ? networkSelect : 'Not Connect' }
+                </div>
+                <div>
+                  <b>ETH Balance :</b> { ethBalance ? ethBalance : '0' } ETH
+                </div>
+                <div>
+                  <b>Token Balance :</b> { otherBalance ? otherBalance : '0' } TENT
+                </div>
+              </div>
+            </Card>
+          </Col>
+          <Col>
+            <Card >
+            <Row className="justify-content-md-center">
+              <Col md="auto" style={{textAlign: 'left'}}>
+                <div style={{marginTop: 20}}>
+                  <b>Send to :</b> <input placeholder='Ethereum Address'></input>
+                </div>
+                <div style={{marginTop: 20}}>
+                  <b>Amount :</b> <input placeholder='Amount'></input> TKUB
+                </div>
+              </Col>
+            </Row>
+              <div style={{marginTop: 10}}>
+                <Button>Send</Button>
+              </div>
+            </Card>
+          </Col>
+        </Row>
+         
+      </div>
+    </Container>
     </>
     
   )
