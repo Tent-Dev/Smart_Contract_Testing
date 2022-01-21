@@ -1,7 +1,9 @@
 import React, {useState, useEffect} from 'react';
-import { Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
 let Web3 = require('web3');
+var numeral = require('numeral');
 
 function Index() {
 
@@ -843,8 +845,9 @@ function Index() {
         if(error){
           console.log(error);
         }else{
-          console.log('getBalance TENT: ', result);
-          setotherBalance(result);
+          let bn = web3.utils.fromWei(result, "ether");
+          console.log('getBalance: ', bn);
+          setotherBalance(Number(bn).toFixed(4));
         }
         
       });
@@ -946,10 +949,19 @@ function Index() {
       </Container>
     </Navbar>
     <Container>
-      <div style={{textAlign: 'center'}}>
-        <div>
-        <b>Contract address :</b> {contract ? contract : 'Not Connect' }
-        </div>
+      <div style={{textAlign: 'center', marginTop: 20}}>
+        <Alert variant='success'>
+        <Row>
+          <Col>
+            <b>Contract address :</b> {contract ? contract : 'Not Connect' }
+          </Col>
+        </Row>  
+        <Row>
+          <Col>
+            <b>Don't have Tent Token ? </b> <Button variant='success' size='sm'>Buy now</Button>
+          </Col>
+        </Row>
+        </Alert>
         <Row>
           <Col>
             <Card >
@@ -958,10 +970,10 @@ function Index() {
                   <b>dApps Network :</b> {networkSelect ? networkSelect : 'Not Connect' }
                 </div>
                 <div>
-                  <b>ETH Balance :</b> { ethBalance ? ethBalance : '0' } ETH
+                  <b>ETH Balance :</b> { ethBalance ? numeral(ethBalance).format('0,0.0000') : '0' } ETH
                 </div>
                 <div>
-                  <b>Token Balance :</b> { otherBalance ? otherBalance : '0' } TENT
+                  <b>Token Balance :</b> { otherBalance ? numeral(otherBalance).format('0,0.0000') : '0' } TENT
                 </div>
               </div>
             </Card>
@@ -974,11 +986,11 @@ function Index() {
                   <b>Send to :</b> <input placeholder='Ethereum Address'></input>
                 </div>
                 <div style={{marginTop: 20}}>
-                  <b>Amount :</b> <input placeholder='Amount'></input> TKUB
+                  <b>Amount :</b> <input placeholder='Amount'></input> TENT
                 </div>
               </Col>
             </Row>
-              <div style={{marginTop: 10}}>
+              <div style={{marginTop: 10, marginBottom: 20}}>
                 <Button>Send</Button>
               </div>
             </Card>
