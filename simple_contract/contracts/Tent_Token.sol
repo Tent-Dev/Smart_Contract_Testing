@@ -43,7 +43,7 @@ contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     // check if the Vendor Contract has enough amount of tokens for the transaction
     uint256 vendorBalance = balanceOf(address(this));
-    require(vendorBalance >= amountToBuy, "Vendor contract has not enough tokens in its balance");
+    require(vendorBalance >= amountToBuy, "Vendor contract has not enough tokens");
 
     // Transfer token to the msg.sender
     (bool sent) = transfer(msg.sender, amountToBuy);

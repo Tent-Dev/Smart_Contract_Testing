@@ -1,6 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import { Alert, Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+// import buyToken from './buyToken';
 
 let Web3 = require('web3');
 var numeral = require('numeral');
@@ -14,7 +17,815 @@ function Index() {
   const [otherBalance, setotherBalance] = useState(0);
   const [networkSelect, setNetwork] = useState(null);
 
-  let abi = [
+  const [receiverAddress, setReceiverAddress] = useState(null);
+  const [transferAmount, setTransferAmount] = useState(0);
+
+  const [open, setOpen] = useState(false);
+
+  // env
+  // test
+  const test_contractAddress = "0xAefA43C5b50710e376f7BD1596a247e134215548";
+  const test_WalletAddress = "0xf62e7C7daB2c6b46f2C15fE02F58604bAFB70446";
+  const test_web3Connect = "http://localhost:7545";
+  // Dev
+  const dev_contractAddress = "0xc472d90ccb58c1df3d6d290e8814232ccf06ef95";
+  const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63";
+  // End of env
+
+  let testLocal = true;
+
+  let contractAddress = testLocal ? test_contractAddress : dev_contractAddress;
+  let web3Connect = testLocal ? test_web3Connect : dev_web3Connect;
+  let abi = testLocal ? [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOfETH",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOfTokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "BuyTokens",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "fromDelegate",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "toDelegate",
+          "type": "address"
+        }
+      ],
+      "name": "DelegateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "previousBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newBalance",
+          "type": "uint256"
+        }
+      ],
+      "name": "DelegateVotesChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOfTokens",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountOfETH",
+          "type": "uint256"
+        }
+      ],
+      "name": "SellTokens",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DOMAIN_SEPARATOR",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "pos",
+          "type": "uint32"
+        }
+      ],
+      "name": "checkpoints",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "fromBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint224",
+              "name": "votes",
+              "type": "uint224"
+            }
+          ],
+          "internalType": "struct ERC20Votes.Checkpoint",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "subtractedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "decreaseAllowance",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        }
+      ],
+      "name": "delegate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiry",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "delegateBySig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "delegates",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPastTotalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPastVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "getVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "addedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "increaseAllowance",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "numCheckpoints",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "permit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "tokensPerEth",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "buyTokens",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function",
+      "payable": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "getBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    }
+  ] : [
     {
       "inputs": [],
       "stateMutability": "nonpayable",
@@ -787,16 +1598,12 @@ function Index() {
     }
   ] // Paste your ABI here
 
-  let testLocal = true;
-  let contractAddress = testLocal ? "0xbE10b68e255068359Ebb272D3564723eF0C496DD" : "0xc472d90ccb58c1df3d6d290e8814232ccf06ef95";
-  let web3Connect = testLocal ? 'http://localhost:7545' : 'wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63'
-
   useEffect(() => {
     window.ethereum ?
       ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts) => {
 
         if(testLocal){
-          accounts[0] = '0xC2fe8d3fD9a6C6A1b7D6D2986fCAe2D5b861A667';
+          accounts[0] = test_WalletAddress;
         }
 
         console.log('getAccount:', accounts);
@@ -812,7 +1619,7 @@ function Index() {
         let c = new w3.eth.Contract(abi, contractAddress);
 
         console.log('Contract: ', c._address);
-        setContract(c._address);
+        setContract(c);
 
         startApp(w3, accounts, c);
 
@@ -820,109 +1627,129 @@ function Index() {
     : console.log("Please install MetaMask")
   }, [])
 
-    function setOWnerAddress(accounts) {
-      console.log('Call setOWnerAddress');
-      setAddress(accounts[0], result =>{
-        console.log('Change Owner address');
-      });
-    }
+  function setOWnerAddress(accounts) {
+    console.log('Call setOWnerAddress');
+    setAddress(accounts[0], result =>{
+      console.log('Change Owner address');
+    });
+  }
 
-    // Get current network
-    function startApp(web3, accounts, c) {
-      console.log('Start App');
-      console.log('Data: ', web3, accounts[0], c);
+  // Get current network
+  function startApp(web3, accounts, c) {
+    console.log('Start App');
+    console.log('Data: ', web3, accounts[0], c);
 
 
-  
-      web3.eth.getBalance(accounts[0]).then( (balances) => {
-        let bn = web3.utils.fromWei(balances, "ether");
-        console.log('getBalance: ', bn);
-        setethBalance(Number(bn).toFixed(4));
-      });
 
-      c.methods.getBalance(contractAddress,accounts[0]).call({from: accounts[0]}, function(error, result){
+    web3.eth.getBalance(accounts[0]).then( (balances) => {
+      let bn = web3.utils.fromWei(balances, "ether");
+      console.log('getBalance: ', bn);
+      setethBalance(Number(bn).toFixed(4));
+    });
 
-        if(error){
-          console.log(error);
-        }else{
-          let bn = web3.utils.fromWei(result, "ether");
-          console.log('getBalance: ', bn);
-          setotherBalance(Number(bn).toFixed(4));
-        }
-        
-      });
-  
-      web3.eth.net.getId().then(netId => {
+    c.methods.getBalance(contractAddress,accounts[0]).call({from: accounts[0]}, function(error, result){
 
-        let network = '';
-        let networkDisplay = '';
-        let warning = '';
-        let explorerUrl = '';
+      if(error){
+        console.log(error);
+      }else{
+        let bn = web3.utils.fromWei(result, "ether");
+        console.log('getBalance: ' + bn + ' TENT');
+        setotherBalance(Number(bn).toFixed(4));
+      }
+      
+    });
 
-        console.log('netId: ' + netId);
+    web3.eth.net.getId().then(netId => {
 
-        switch (netId) {
-          case 1:
-              network = 'Mainnet';
-              networkDisplay = network;
-              warning = 'please switch your network to Kovan or Thai Chain';
-              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-              break
-          case 2:
-              network = 'Deprecated Morden';
-              networkDisplay = network;
-              warning = 'please switch your network to Kovan or Thai Chain';
-              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-              break
-          case 3:
-              network = 'Ropsten';
-              networkDisplay = network;
-              warning = 'please switch your network to Kovan or Thai Chain';
-              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-              break
-          case 4:
-              network = 'Rinkeby';
-              networkDisplay = network;
-              contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
-              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-              break
-          case 7:
-              network = 'Thai Chain';
-              networkDisplay = network;
-              contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
-              explorerUrl = "https://exp.tch.in.th/tx/"
-              break
-          case 42:
-              network = 'Kovan';
-              networkDisplay = network;
-              explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
-              break
-          case 1337:
-              network = 'Kovan - Optimism';
-              networkDisplay = '<strong>Kovan Optimism</strong><br/>(Level 2 Ethereum)';
-              contractAddress = '0xE6dCD042c4dDaC0f390A7B1CB8B4D60DD20b6338';
-              explorerUrl = "https://kovan-l2-explorer.surge.sh/tx/";
-              break
-          case 5777:
-              network = 'Ganache';
-              networkDisplay = network;
-              break
-          case KULAPBesuNetworkId:
-              network = 'KULAP Besu'
-              networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
-              contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
-              explorerUrl = "http://besu1.kulap.io/tx/";
-              break
-          default:
-              network = 'Unknown';
-              networkDisplay = network;
-              warning = 'please switch your network to Kovan or Thai Chain';
-        }
-        setNetwork(networkDisplay);
-        console.log('Network: ', networkDisplay);
-      })
-    }
+      let network = '';
+      let networkDisplay = '';
+      let warning = '';
+      let explorerUrl = '';
 
+      console.log('netId: ' + netId);
+
+      switch (netId) {
+        case 1:
+            network = 'Mainnet';
+            networkDisplay = network;
+            warning = 'please switch your network to Kovan or Thai Chain';
+            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+            break
+        case 2:
+            network = 'Deprecated Morden';
+            networkDisplay = network;
+            warning = 'please switch your network to Kovan or Thai Chain';
+            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+            break
+        case 3:
+            network = 'Ropsten';
+            networkDisplay = network;
+            warning = 'please switch your network to Kovan or Thai Chain';
+            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+            break
+        case 4:
+            network = 'Rinkeby';
+            networkDisplay = network;
+            contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
+            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+            break
+        case 7:
+            network = 'Thai Chain';
+            networkDisplay = network;
+            contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
+            explorerUrl = "https://exp.tch.in.th/tx/"
+            break
+        case 42:
+            network = 'Kovan';
+            networkDisplay = network;
+            explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+            break
+        case 1337:
+            network = 'Kovan - Optimism';
+            networkDisplay = '<strong>Kovan Optimism</strong><br/>(Level 2 Ethereum)';
+            contractAddress = '0xE6dCD042c4dDaC0f390A7B1CB8B4D60DD20b6338';
+            explorerUrl = "https://kovan-l2-explorer.surge.sh/tx/";
+            break
+        case 5777:
+            network = 'Ganache';
+            networkDisplay = network;
+            break
+        case KULAPBesuNetworkId:
+            network = 'KULAP Besu'
+            networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
+            contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
+            explorerUrl = "http://besu1.kulap.io/tx/";
+            break
+        default:
+            network = 'Unknown';
+            networkDisplay = network;
+            warning = 'please switch your network to Kovan or Thai Chain';
+      }
+      setNetwork(networkDisplay);
+      console.log('Network: ', networkDisplay);
+    })
+  }
+
+  function transfer() {
+
+    let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
+
+    console.log('My address: ', address);
+    console.log('Transfer to: ', receiverAddress);
+    console.log('Amount: ', convertUintTransferAmount);
+
+    contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
+      console.log('Transfer: ', result);
+    });
+  }
+
+  function receiverAddressChange (input) {
+    setReceiverAddress(input.target.value);
+  }
+
+  function transferAmountChange (input) {
+    setTransferAmount(input.target.value);
+  }
 
   return (
     <>
@@ -953,12 +1780,37 @@ function Index() {
         <Alert variant='success'>
         <Row>
           <Col>
-            <b>Contract address :</b> {contract ? contract : 'Not Connect' }
+            <b>Contract address :</b> {contract ? contract['_address'] : 'Not Connect' }
           </Col>
         </Row>  
         <Row>
           <Col>
-            <b>Don't have Tent Token ? </b> <Button variant='success' size='sm'>Buy now</Button>
+            <b>Don't have Tent Token ? </b>
+            <Popup open={open} trigger={<Button variant='success' size='sm'>Buy now</Button>} modal closeOnDocumentClick={false}>
+              <div>
+                <Row className="justify-content-md-center">
+                  <Col md="auto" style={{textAlign: 'left'}}>
+                    <div style={{marginTop: 20}}>
+                      <b>Sepnd</b> <input placeholder='ETH'></input> ETH
+                    </div>
+                    <div style={{marginTop: 20}}>
+                      <b>Get</b> <input placeholder='TENT'></input> TENT
+                    </div>
+                  </Col>
+                </Row>
+                <Col md="auto" style={{textAlign: 'center'}}>
+                  <div style={{marginTop: 10, marginBottom: 20}}>
+                    <Button>Swap</Button>
+                  </div>
+                </Col>
+              </div>
+              <button
+                className="button"
+                onClick={() => setOpen(popOpen => !popOpen)}
+              >
+                Close
+              </button>
+            </Popup>
           </Col>
         </Row>
         </Alert>
@@ -983,15 +1835,15 @@ function Index() {
             <Row className="justify-content-md-center">
               <Col md="auto" style={{textAlign: 'left'}}>
                 <div style={{marginTop: 20}}>
-                  <b>Send to :</b> <input placeholder='Ethereum Address'></input>
+                  <b>Send to :</b> <input placeholder='Ethereum Address' value={receiverAddress} onChange={receiverAddressChange}></input>
                 </div>
                 <div style={{marginTop: 20}}>
-                  <b>Amount :</b> <input placeholder='Amount'></input> TENT
+                  <b>Amount :</b> <input placeholder='Amount' value={transferAmount} onChange={transferAmountChange}></input> TENT
                 </div>
               </Col>
             </Row>
               <div style={{marginTop: 10, marginBottom: 20}}>
-                <Button>Send</Button>
+                <Button onClick={transfer}>Send</Button>
               </div>
             </Card>
           </Col>
@@ -1004,4 +1856,4 @@ function Index() {
   )
 }
 
-export default Index
+export default Index;
