@@ -28,11 +28,11 @@ function Index() {
   const test_WalletAddress = "0xf62e7C7daB2c6b46f2C15fE02F58604bAFB70446";
   const test_web3Connect = "http://localhost:7545";
   // Dev
-  const dev_contractAddress = "0xc472d90ccb58c1df3d6d290e8814232ccf06ef95";
+  const dev_contractAddress = "0x8Cc37C15B6590145f351361dcb35d499cf2CFa8C";
   const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63";
   // End of env
 
-  let testLocal = true;
+  let testLocal = false;
 
   let contractAddress = testLocal ? test_contractAddress : dev_contractAddress;
   let web3Connect = testLocal ? test_web3Connect : dev_web3Connect;
@@ -1011,7 +1011,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1035,7 +1036,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1078,7 +1080,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1145,7 +1148,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -1158,7 +1162,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1252,7 +1257,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1271,7 +1277,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1295,7 +1302,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1314,7 +1322,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1351,7 +1360,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1370,7 +1380,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1389,7 +1400,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -1402,7 +1414,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1465,7 +1478,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -1478,7 +1492,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -1491,7 +1506,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -1570,7 +1586,8 @@ function Index() {
         }
       ],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
@@ -1594,7 +1611,8 @@ function Index() {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ] // Paste your ABI here
 
@@ -1625,6 +1643,11 @@ function Index() {
 
       }).catch((err) => console.log(err))
     : console.log("Please install MetaMask")
+
+    ethereum.on('accountsChanged', (accounts) => {
+      console.log('Account Changed');
+      window.location.reload();
+    });
   }, [])
 
   function setOWnerAddress(accounts) {
@@ -1730,7 +1753,7 @@ function Index() {
     })
   }
 
-  function transfer() {
+  async function transfer() {
 
     let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
 
@@ -1738,9 +1761,33 @@ function Index() {
     console.log('Transfer to: ', receiverAddress);
     console.log('Amount: ', convertUintTransferAmount);
 
-    contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
-      console.log('Transfer: ', result);
-    });
+    // For Ganache
+
+    // contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
+    //   console.log('Transfer: ', result);
+    // });
+
+    // ================================================
+
+    // For Testnet
+
+    const transactionParameters = {
+      from: address,
+      to: dev_contractAddress,
+      data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
+    };
+
+    console.log('transactionParameters: ', transactionParameters);
+
+    const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
+      console.log('Sending transaction...');
+      console.log(result);
+    }).catch((error) => {
+      console.log('Sending transaction error');
+      console.log(error);
+    })
+
+    // ================================================
   }
 
   function receiverAddressChange (input) {
