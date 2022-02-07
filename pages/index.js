@@ -3,7 +3,8 @@ import { Alert, Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } fr
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import buyToken from './buyToken';
+import swal from 'sweetalert';
+import buyTokenComponent from '../components/buyToken';
 
 let Web3 = require('web3');
 var numeral = require('numeral');
@@ -19,6 +20,8 @@ function Index() {
 
   const [receiverAddress, setReceiverAddress] = useState(null);
   const [transferAmount, setTransferAmount] = useState(0);
+
+  const [buyAmount, setBuyAmount] = useState(0);
 
   const [open, setOpen] = useState(false);
 
@@ -1628,8 +1631,6 @@ function Index() {
         
         setOWnerAddress(accounts);
         
-        // let w3 = await new Web3('wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63');
-
         let w3 = await new Web3(web3Connect);
         
         setWeb3(w3);
@@ -1755,11 +1756,52 @@ function Index() {
 
   async function transfer() {
 
-    let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
+    try{
+      let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
+
+          console.log('My address: ', address);
+          console.log('Transfer to: ', receiverAddress);
+          console.log('Amount: ', convertUintTransferAmount);
+
+          // For Ganache
+
+          // contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
+          //   console.log('Transfer: ', result);
+          // });
+
+          // ================================================
+
+          // For Testnet
+
+          const transactionParameters = {
+            from: address,
+            to: dev_contractAddress,
+            data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
+          };
+
+          console.log('transactionParameters: ', transactionParameters);
+
+          const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
+            console.log('Sending transaction...');
+            console.log(result);
+          }).catch((error) => {
+            console.log('Sending transaction error');
+            console.log(error);
+          })
+    }
+    catch(err){
+      console.log(err.message);
+      swal ( "Oops" ,  err.message,  "error" )
+    }
+    
+  }
+
+  async function buyToken() {
+
+    let convertUintBuyAmount = web3.utils.toWei(buyAmount, "ether");
 
     console.log('My address: ', address);
-    console.log('Transfer to: ', receiverAddress);
-    console.log('Amount: ', convertUintTransferAmount);
+    console.log('Buy Amount: ', convertUintBuyAmount);
 
     // For Ganache
 
@@ -1774,7 +1816,7 @@ function Index() {
     const transactionParameters = {
       from: address,
       to: dev_contractAddress,
-      data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
+      data: contract.methods.buyTokens({value: convertUintBuyAmount}).encodeABI()
     };
 
     console.log('transactionParameters: ', transactionParameters);
@@ -1786,8 +1828,6 @@ function Index() {
       console.log('Sending transaction error');
       console.log(error);
     })
-
-    // ================================================
   }
 
   function receiverAddressChange (input) {
@@ -1796,6 +1836,10 @@ function Index() {
 
   function transferAmountChange (input) {
     setTransferAmount(input.target.value);
+  }
+
+  function buyAmountChange (input) {
+    setBuyAmount(input.target.value);
   }
 
   return (
@@ -1834,11 +1878,13 @@ function Index() {
           <Col>
             <b>Don't have Tent Token ? </b>
             <Popup open={open} trigger={<Button variant='success' size='sm'>Buy now</Button>} modal closeOnDocumentClick={false}>
+              { close => (
+              <>
               <div>
                 <Row className="justify-content-md-center">
                   <Col md="auto" style={{textAlign: 'left'}}>
                     <div style={{marginTop: 20}}>
-                      <b>Sepnd</b> <input placeholder='ETH'></input> ETH
+                      <b>Sepnd</b> <input placeholder='ETH' value={buyAmount} onChange={buyAmountChange}></input> ETH
                     </div>
                     <div style={{marginTop: 20}}>
                       <b>Get</b> <input placeholder='TENT'></input> TENT
@@ -1847,16 +1893,21 @@ function Index() {
                 </Row>
                 <Col md="auto" style={{textAlign: 'center'}}>
                   <div style={{marginTop: 10, marginBottom: 20}}>
-                    <Button>Swap</Button>
+                    <Button onClick={buyToken}>Buy Token</Button>
                   </div>
                 </Col>
               </div>
-              <button
+              {/* <buyTokenComponent/> */}
+              <Button
+                variant="danger"
                 className="button"
-                onClick={() => setOpen(popOpen => !popOpen)}
+                onClick={close}
               >
                 Close
-              </button>
+              </Button>
+              </>
+              )
+            }
             </Popup>
           </Col>
         </Row>
