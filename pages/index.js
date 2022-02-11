@@ -1877,7 +1877,7 @@ function Index() {
         <Row>
           <Col>
             <b>Don't have Tent Token ? </b>
-            <Popup open={open} trigger={<Button variant='success' size='sm'>Buy now</Button>} modal closeOnDocumentClick={false}>
+            <Popup open={open} trigger={<Button variant='success' size='sm'>Get Airdrop</Button>} modal closeOnDocumentClick={false}>
               { close => (
               <>
               <div>

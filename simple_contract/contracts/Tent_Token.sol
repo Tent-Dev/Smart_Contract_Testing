@@ -12,9 +12,7 @@ contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
   // token price for ETH
   uint256 public tokensPerEth = 100;
-
-  event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
-  event SellTokens(address seller, uint256 amountOfTokens, uint256 amountOfETH);
+  uint256 public tokensSold;
 
   constructor() ERC20('Tent Token', 'TENT') ERC20Permit('TentGovernanceToken') {
     _mint(msg.sender, 1e8 * 10**decimals());
@@ -36,28 +34,17 @@ contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     super._burn(_account, _amount);
   }
 
-  function buyTokens() public payable returns (uint256 tokenAmount) {
-    require(msg.value > 0, "Send ETH to buy some tokens");
-
-    uint256 amountToBuy = msg.value * tokensPerEth;
-
-    // check if the Vendor Contract has enough amount of tokens for the transaction
-    uint256 vendorBalance = balanceOf(address(this));
-    require(vendorBalance >= amountToBuy, "Vendor contract has not enough tokens");
-
-    // Transfer token to the msg.sender
-    (bool sent) = transfer(msg.sender, amountToBuy);
-    require(sent, "Failed to transfer token to user");
-
-    // emit the event
-    emit BuyTokens(msg.sender, msg.value, amountToBuy);
-
-    return amountToBuy;
-  }
-
   //Get balance by token address and holder address
   function getBalance(address token, address holder) public view returns(uint) {
     IERC20 token = IERC20(token);
     return token.balanceOf(holder);
+  }
+
+  function getAirdrops() public {
+     require(block.timestamp > lockTime[msg.sender], "lock time has not expired. Please try again later");
+    _mint(msg.sender, airdropsAmount);
+
+    //updates locktime 1 day from now
+    lockTime[msg.sender] = block.timestamp + 1 days;
   }
 }
