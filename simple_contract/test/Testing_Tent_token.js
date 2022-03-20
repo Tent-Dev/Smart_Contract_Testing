@@ -12,7 +12,7 @@ contract("Tent_Token testing", async accounts => {
     // Get initial balances of first and second account.
     const account_one = accounts[0];
     const account_two = accounts[1];
-    const amount = web3.utils.toWei('10', 'ether');; //amount of token want to send
+    const amount = web3.utils.toWei('10', 'ether'); //amount of token want to send
     const tokenDeployed = await TentToken.deployed();
 
     console.log('Send '+ amount + ' Token (convert from wei is: ' + web3.utils.fromWei(amount, "ether") + ' Token)');
@@ -50,5 +50,39 @@ contract("Tent_Token testing", async accounts => {
       account_two_starting_balance + amount,
       "Amount wasn't correctly sent to the receiver"
     );
+  });
+
+  it("should get airdrop", async () => {
+    const tokenDeployed = await TentToken.deployed();
+    const account_receiver = accounts[2];
+    const dropAmount = web3.utils.toWei('10', 'ether');
+
+    let balanceHolder = await tokenDeployed.balanceOf.call(accounts[0]);
+    let balanceReceiver = await tokenDeployed.balanceOf.call(account_receiver);
+
+    console.log('Balance of holder account is: ' + balanceHolder);
+    console.log('Balance of receiver account is: ' + balanceReceiver);
+
+    await tokenDeployed.increaseAllowance(account_receiver, dropAmount);
+
+    console.log('Sending token...');
+    getAirdrop = await tokenDeployed.getAirdrops({from : account_receiver});
+
+    balance = await tokenDeployed.balanceOf.call(account_receiver);
+    console.log('Balance of receiver account is: ' + balance);
+
+    const account_holder_ending_balance = Number(balanceHolder);
+    const account_receiver_ending_balance = Number(balanceReceiver);
+
+    //check after balance
+    assert.equal(
+      account_holder_ending_balance,
+      account_holder_ending_balance - account_receiver_ending_balance,
+      "Amount wasn't correctly taken from the holder"
+    );
+
+    // console.log('Sending token again...');
+    // await tokenDeployed.increaseAllowance(account_receiver, dropAmount);
+    // getAirdrop = await tokenDeployed.getAirdrops({from : account_receiver});
   });
 });

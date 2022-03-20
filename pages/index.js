@@ -29,13 +29,14 @@ function Index() {
   // test
   const test_contractAddress = "0xAefA43C5b50710e376f7BD1596a247e134215548";
   const test_WalletAddress = "0xf62e7C7daB2c6b46f2C15fE02F58604bAFB70446";
+  // const test_WalletAddress = "0x2a06a95A601276570d5375Bad22637C72A5226B5";
   const test_web3Connect = "http://localhost:7545";
   // Dev
   const dev_contractAddress = "0x8Cc37C15B6590145f351361dcb35d499cf2CFa8C";
   const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63";
   // End of env
 
-  let testLocal = false;
+  let testLocal = true;
 
   let contractAddress = testLocal ? test_contractAddress : dev_contractAddress;
   let web3Connect = testLocal ? test_web3Connect : dev_web3Connect;
@@ -68,31 +69,6 @@ function Index() {
         }
       ],
       "name": "Approval",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "buyer",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amountOfETH",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amountOfTokens",
-          "type": "uint256"
-        }
-      ],
-      "name": "BuyTokens",
       "type": "event"
     },
     {
@@ -168,31 +144,6 @@ function Index() {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
-          "internalType": "address",
-          "name": "seller",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amountOfTokens",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amountOfETH",
-          "type": "uint256"
-        }
-      ],
-      "name": "SellTokens",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
           "indexed": true,
           "internalType": "address",
           "name": "from",
@@ -222,6 +173,34 @@ function Index() {
           "internalType": "bytes32",
           "name": "",
           "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "airdropWalletAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "airdropsAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -564,6 +543,26 @@ function Index() {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "lockTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
       "inputs": [],
       "name": "name",
       "outputs": [
@@ -697,20 +696,6 @@ function Index() {
     },
     {
       "inputs": [],
-      "name": "tokensPerEth",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [],
       "name": "totalSupply",
       "outputs": [
         {
@@ -790,20 +775,6 @@ function Index() {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "buyTokens",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenAmount",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "payable",
-      "type": "function",
-      "payable": true
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -827,6 +798,13 @@ function Index() {
       "stateMutability": "view",
       "type": "function",
       "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "getAirdrops",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ] : [
     {
@@ -1759,35 +1737,31 @@ function Index() {
     try{
       let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
 
-          console.log('My address: ', address);
-          console.log('Transfer to: ', receiverAddress);
-          console.log('Amount: ', convertUintTransferAmount);
+      console.log('My address: ', address);
+      console.log('Transfer to: ', receiverAddress);
+      console.log('Amount: ', convertUintTransferAmount);
 
-          // For Ganache
+      const transactionParameters = {
+        from: address,
+        to: contractAddress,
+        data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
+      };
 
-          // contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
-          //   console.log('Transfer: ', result);
-          // });
+      console.log('transactionParameters: ', transactionParameters);
 
-          // ================================================
-
-          // For Testnet
-
-          const transactionParameters = {
-            from: address,
-            to: dev_contractAddress,
-            data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
-          };
-
-          console.log('transactionParameters: ', transactionParameters);
-
-          const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
-            console.log('Sending transaction...');
-            console.log(result);
-          }).catch((error) => {
-            console.log('Sending transaction error');
-            console.log(error);
-          })
+      if(testLocal){
+          contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
+            console.log('Transfer: ', result);
+          });
+      }else{
+        const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
+          console.log('Sending transaction...');
+          console.log(result);
+        }).catch((error) => {
+          console.log('Sending transaction error');
+          console.log(error);
+        })
+      }
     }
     catch(err){
       console.log(err.message);
@@ -1796,12 +1770,10 @@ function Index() {
     
   }
 
-  async function buyToken() {
+  async function getToken() {
 
-    let convertUintBuyAmount = web3.utils.toWei(buyAmount, "ether");
 
     console.log('My address: ', address);
-    console.log('Buy Amount: ', convertUintBuyAmount);
 
     // For Ganache
 
@@ -1813,21 +1785,20 @@ function Index() {
 
     // For Testnet
 
-    const transactionParameters = {
-      from: address,
-      to: dev_contractAddress,
-      data: contract.methods.buyTokens({value: convertUintBuyAmount}).encodeABI()
-    };
-
-    console.log('transactionParameters: ', transactionParameters);
-
-    const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
+    await contract.methods.getAirdrops().call({from: address}).then((result) => {
       console.log('Sending transaction...');
       console.log(result);
     }).catch((error) => {
       console.log('Sending transaction error');
       console.log(error);
     })
+
+    // web3.eth.call({
+    //   to: dev_contractAddress,
+    //   data: contract.methods.getAirdrops().encodeABI()
+    // })
+    // .then(console.log);
+
   }
 
   function receiverAddressChange (input) {
@@ -1877,38 +1848,7 @@ function Index() {
         <Row>
           <Col>
             <b>Don't have Tent Token ? </b>
-            <Popup open={open} trigger={<Button variant='success' size='sm'>Get Airdrop</Button>} modal closeOnDocumentClick={false}>
-              { close => (
-              <>
-              <div>
-                <Row className="justify-content-md-center">
-                  <Col md="auto" style={{textAlign: 'left'}}>
-                    <div style={{marginTop: 20}}>
-                      <b>Sepnd</b> <input placeholder='ETH' value={buyAmount} onChange={buyAmountChange}></input> ETH
-                    </div>
-                    <div style={{marginTop: 20}}>
-                      <b>Get</b> <input placeholder='TENT'></input> TENT
-                    </div>
-                  </Col>
-                </Row>
-                <Col md="auto" style={{textAlign: 'center'}}>
-                  <div style={{marginTop: 10, marginBottom: 20}}>
-                    <Button onClick={buyToken}>Buy Token</Button>
-                  </div>
-                </Col>
-              </div>
-              {/* <buyTokenComponent/> */}
-              <Button
-                variant="danger"
-                className="button"
-                onClick={close}
-              >
-                Close
-              </Button>
-              </>
-              )
-            }
-            </Popup>
+           <Button variant='success' size='sm' onClick={getToken}>Get Airdrop</Button>
           </Col>
         </Row>
         </Alert>

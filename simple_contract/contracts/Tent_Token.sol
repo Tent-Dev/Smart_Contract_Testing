@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
-
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
@@ -10,9 +7,10 @@ import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
 
 contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
-  // token price for ETH
-  uint256 public tokensPerEth = 100;
-  uint256 public tokensSold;
+  uint256 public airdropsAmount = 1*10**decimals();
+  address public constant airdropWalletAddress = 0xf62e7C7daB2c6b46f2C15fE02F58604bAFB70446;
+
+   mapping(address => uint) public lockTime;
 
   constructor() ERC20('Tent Token', 'TENT') ERC20Permit('TentGovernanceToken') {
     _mint(msg.sender, 1e8 * 10**decimals());
@@ -41,9 +39,9 @@ contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
   }
 
   function getAirdrops() public {
-     require(block.timestamp > lockTime[msg.sender], "lock time has not expired. Please try again later");
-    _mint(msg.sender, airdropsAmount);
-
+    require(block.timestamp > lockTime[msg.sender], "lock time has not expired. Please try again later");
+    // ERC20.approve(airdropWalletAddress, airdropsAmount);
+    ERC20.transferFrom(airdropWalletAddress, msg.sender, airdropsAmount);
     //updates locktime 1 day from now
     lockTime[msg.sender] = block.timestamp + 1 days;
   }
