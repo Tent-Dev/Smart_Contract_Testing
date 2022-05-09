@@ -63,23 +63,27 @@ contract("Tent_Token testing", async accounts => {
     console.log('Balance of holder account is: ' + balanceHolder);
     console.log('Balance of receiver account is: ' + balanceReceiver);
 
-    await tokenDeployed.increaseAllowance(account_receiver, dropAmount);
+    // await tokenDeployed.increaseAllowance(account_receiver, dropAmount);
 
     console.log('Sending token...');
-    getAirdrop = await tokenDeployed.getAirdrops({from : account_receiver});
+    // getAirdrop = await tokenDeployed.getAirdrops({from : account_receiver});
 
-    balance = await tokenDeployed.balanceOf.call(account_receiver);
-    console.log('Balance of receiver account is: ' + balance);
+    getAirdrop = await tokenDeployed.getAirdrops(account_receiver, dropAmount);
 
-    const account_holder_ending_balance = Number(balanceHolder);
-    const account_receiver_ending_balance = Number(balanceReceiver);
+    balanceAfterHolder = await tokenDeployed.balanceOf.call(accounts[0]);
+    balanceAfterReceiver = await tokenDeployed.balanceOf.call(account_receiver);
+    console.log('Balance of holder account is: ' + balanceAfterHolder);
+    console.log('Balance of receiver account is: ' + balanceAfterReceiver);
+    const account_holder_ending_balance = Number(balanceAfterHolder);
+    const account_receiver_ending_balance = Number(balanceAfterReceiver);
 
+    console.log('getAirdrop' + getAirdrop);
     //check after balance
-    assert.equal(
-      account_holder_ending_balance,
-      account_holder_ending_balance - account_receiver_ending_balance,
-      "Amount wasn't correctly taken from the holder"
-    );
+    // assert.equal(
+    //   account_holder_ending_balance,
+    //   account_holder_ending_balance - account_receiver_ending_balance,
+    //   "Amount wasn't correctly taken from the holder"
+    // );
 
     // console.log('Sending token again...');
     // await tokenDeployed.increaseAllowance(account_receiver, dropAmount);

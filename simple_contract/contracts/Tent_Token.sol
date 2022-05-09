@@ -38,11 +38,20 @@ contract Tent_Token is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     return token.balanceOf(holder);
   }
 
-  function getAirdrops() public {
-    require(block.timestamp > lockTime[msg.sender], "lock time has not expired. Please try again later");
+  function get_Balance(address token, address holder) public view returns(uint) {
+    IERC20 token = IERC20(token);
+    return token.balanceOf(holder);
+  }
+
+  function getAirdrops(address requestor) public returns(uint){
+    // require(block.timestamp > lockTime[msg.sender], "lock time has not expired. Please try again later");
     // ERC20.approve(airdropWalletAddress, airdropsAmount);
-    ERC20.transferFrom(airdropWalletAddress, msg.sender, airdropsAmount);
+    // ERC20.transferFrom(airdropWalletAddress, msg.sender, airdropsAmount);
+
+    // _mint(requestor, amount);
+    
+    return ERC20.balanceOf(requestor);
     //updates locktime 1 day from now
-    lockTime[msg.sender] = block.timestamp + 1 days;
+    // lockTime[msg.sender] = block.timestamp + 1 days;
   }
 }
