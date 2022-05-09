@@ -1,10 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import { Alert, Badge, Button, Card, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import swal from 'sweetalert';
-import buyTokenComponent from '../components/buyToken';
 
 let Web3 = require('web3');
 var numeral = require('numeral');
@@ -26,8 +24,6 @@ function Index() {
   const [transferAmount, setTransferAmount] = useState(0);
 
   const [buyAmount, setBuyAmount] = useState(0);
-
-  const [open, setOpen] = useState(false);
 
   // env
   // test
@@ -1154,7 +1150,7 @@ function Index() {
           </NavDropdown>
         </Nav> */}
         <Nav>
-          <Nav.Link href="#deets">{address ? address : 'Not Connect'}</Nav.Link>
+          <Nav.Link>{address ? address : <div onClick={setContractInit}>Connect Wallet</div>}</Nav.Link>
         </Nav>
       </Navbar.Collapse>
       </Container>
