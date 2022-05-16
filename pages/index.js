@@ -23,8 +23,6 @@ function Index() {
   const [receiverAddress, setReceiverAddress] = useState(null);
   const [transferAmount, setTransferAmount] = useState(0);
 
-  const [buyAmount, setBuyAmount] = useState(0);
-
   // env
   // test
   const test_contractAddress = framework == 'truffle' ? "0xAefA43C5b50710e376f7BD1596a247e134215548" : "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -32,7 +30,7 @@ function Index() {
   // const test_WalletAddress = "0x2a06a95A601276570d5375Bad22637C72A5226B5";
   const test_web3Connect = framework == 'truffle' ? "http://localhost:7545" : "ws://localhost:8545" ;
   // Dev
-  const dev_contractAddress = framework == 'truffle' ? "0x8Cc37C15B6590145f351361dcb35d499cf2CFa8C" : "0xA128Fad31fE739281c947fad7449214c64Ea1821";
+  const dev_contractAddress = framework == 'truffle' ? "0x8Cc37C15B6590145f351361dcb35d499cf2CFa8C" : "0x6B4354492C9093fC1E7Ef5C68B751C15e0051e90";
   const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63";
   // End of env
 
@@ -904,7 +902,7 @@ function Index() {
         setethBalance(Number(bn).toFixed(4));
       });
 
-      c.methods.getBalance(contractAddress,accounts[0]).call({from: accounts[0]}, function(error, result){
+      c.methods.balanceOf(accounts[0]).call({from: accounts[0]}, function(error, result){
 
         if(error){
           console.log(error);
@@ -990,6 +988,36 @@ function Index() {
     }
   }
 
+  //Workshop: 8) Write transfer function here
+  async function transterHardhat() {
+    try{
+      let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
+
+      console.log('My address: ', address);
+      console.log('Transfer to: ', receiverAddress);
+      console.log('Amount: ', convertUintTransferAmount);
+
+      const transactionParameters = {
+        from: address,
+        to: contractAddress,
+        data: contract.methods.transfer(receiverAddress, convertUintTransferAmount).encodeABI()
+      };
+
+      await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
+        console.log('Sending transaction...');
+        console.log(result);
+      }).catch((error) => {
+        console.log('Sending transaction error');
+        console.log(error);
+      })
+    }
+    catch(err){
+      console.log(err.message);
+      swal ( "Oops" ,  err.message,  "error" )
+    }
+  }
+  //----- End of Workshop: 8) Write transfer function here -----
+
   async function transfer() {
 
     try{
@@ -1026,67 +1054,6 @@ function Index() {
       swal ( "Oops" ,  err.message,  "error" )
     }
     
-  }
-
-  async function getToken() {
-    const dropAmount = '10';
-
-    console.log('My address: ', address);
-
-    // For Ganache
-
-    // contract.methods.transfer(receiverAddress, convertUintTransferAmount).send({from: address}, function(error, result){
-    //   console.log('Transfer: ', result);
-    // });
-
-    // ================================================
-
-    // For Testnet
-    // await contract.methods.increaseAllowance(address, dropAmount);
-    // await contract.methods.getAirdrops({from: '0xE83CC64373912Bf2e2093702E8a25D0C6fa87846'}).then((result) => {
-    //   console.log('Sending airdrop...');
-    //   console.log(result);
-    // }).catch((error) => {
-    //   console.log('Sending airdrop error');
-    //   console.log(error);
-    // });
-
-    try{
-
-      let convertUintTransferAmount = web3.utils.toWei(dropAmount, "ether");
-      // const transactionParameters = {
-      //   from: address,
-      //   to: contractAddress,
-      //   data: contract.methods.getAirdrops(address).encodeABI()
-      // };
-
-      // console.log('transactionParameters: ', transactionParameters);
-
-      if(testLocal){
-          // await contract.methods.increaseAllowance(address, convertUintTransferAmount);
-          await contract.methods.getAirdrops(address).send({from: address}, function(error, result){
-            console.log('Transfer: ', result);
-          });
-      }else{
-        const txHash =  await window.ethereum.request({method: 'eth_sendTransaction', params: [transactionParameters]}).then((result) => {
-          console.log('Sending transaction...');
-          console.log(result);
-        }).catch((error) => {
-          console.log('Sending transaction error');
-          console.log(error);
-        })
-      }
-    }catch(err){
-      console.log(err.message);
-      swal ( "Oops" ,  err.message,  "error" )
-    }
-
-    // web3.eth.call({
-    //   to: dev_contractAddress,
-    //   data: contract.methods.getAirdrops().encodeABI()
-    // })
-    // .then(console.log);
-
   }
 
   async function greetMe() {
@@ -1127,10 +1094,6 @@ function Index() {
     setTransferAmount(input.target.value);
   }
 
-  function buyAmountChange (input) {
-    setBuyAmount(input.target.value);
-  }
-
   return (
     <>
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -1161,12 +1124,6 @@ function Index() {
         <Row>
           <Col>
             <b>Contract address :</b> {contract ? contract['_address'] : 'Not Connect' }
-          </Col>
-        </Row>  
-        <Row>
-          <Col>
-            <b>Don't have Tent Token ? </b>
-           <Button variant='success' size='sm' onClick={getToken}>Get Airdrop</Button>
           </Col>
         </Row>
         </Alert>
@@ -1248,6 +1205,21 @@ function Index() {
               </Row>
               <div style={{marginTop: 10, marginBottom: 20}}>
                 <Button onClick={setGreetMe}>Set Me!</Button>
+              </div>
+            </Card>
+            <Card style={{marginTop: 20}}>
+            <Row className="justify-content-md-center">
+              <Col md="auto" style={{textAlign: 'left'}}>
+                <div style={{marginTop: 20}}>
+                  <b>Send to :</b> <input placeholder='Ethereum Address' value={receiverAddress} onChange={receiverAddressChange}></input>
+                </div>
+                <div style={{marginTop: 20}}>
+                  <b>Amount :</b> <input placeholder='Amount' value={transferAmount} onChange={transferAmountChange}></input> HHT
+                </div>
+              </Col>
+            </Row>
+              <div style={{marginTop: 10, marginBottom: 20}}>
+                <Button onClick={transterHardhat}>Send</Button>
               </div>
             </Card>
           </>
