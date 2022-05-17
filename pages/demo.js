@@ -25,6 +25,11 @@ function Index() {
   var contractJsonHardhat = require('../hardhat_simple_contract/artifacts/contracts/Greeter.sol/Greeter.json');
   let abi = contractJsonHardhat['abi'];
 
+  useEffect(async () => {
+    console.log('==========FIRST APP RUN==========');
+    await setContractInit()
+  }, []);
+
   async function setContractInit() {
     try{
       window.ethereum ?
@@ -36,7 +41,7 @@ function Index() {
 
           console.log('getAccount:', accounts);
           
-          setOWnerAddress(accounts);
+          setAddress(accounts[0]);
           
           let w3 = await new Web3(web3Connect);
           
@@ -60,16 +65,6 @@ function Index() {
       window.location.reload();
     });
   };
-
-  useEffect(async () => {
-    console.log('==========FIRST APP RUN==========');
-    await setContractInit()
-  }, []);
-
-  function setOWnerAddress(accounts) {
-    console.log('Call setOWnerAddress');
-    setAddress(accounts[0]);
-  }
 
   function startApp(web3, accounts, c) {
     console.log('Start App');
@@ -163,7 +158,7 @@ function Index() {
     <>
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
-      <Navbar.Brand href="#home">Tent Token</Navbar.Brand>
+      <Navbar.Brand href="#home">HardHat Token</Navbar.Brand>
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />
       <Navbar.Collapse id="responsive-navbar-nav" style={{justifyContent: 'right'}}>
         <Nav>
@@ -192,7 +187,7 @@ function Index() {
                   <b>ETH Balance :</b> { ethBalance ? numeral(ethBalance).format('0,0.0000') : '0' } ETH
                 </div>
                 <div>
-                  <b>Token Balance :</b> { otherBalance ? numeral(otherBalance).format('0,0.0000') : '0' } TENT
+                  <b>Token Balance :</b> { otherBalance ? numeral(otherBalance).format('0,0.0000') : '0' } HHT
                 </div>
               </div>
             </Card>

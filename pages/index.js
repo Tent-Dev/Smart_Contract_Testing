@@ -989,7 +989,7 @@ function Index() {
   }
 
   //Workshop: 8) Write transfer function here
-  async function transterHardhat() {
+  async function transferHardhat() {
     try{
       let convertUintTransferAmount = web3.utils.toWei(transferAmount, "ether");
 
@@ -1219,7 +1219,7 @@ function Index() {
               </Col>
             </Row>
               <div style={{marginTop: 10, marginBottom: 20}}>
-                <Button onClick={transterHardhat}>Send</Button>
+                <Button onClick={transferHardhat}>Send</Button>
               </div>
             </Card>
           </>

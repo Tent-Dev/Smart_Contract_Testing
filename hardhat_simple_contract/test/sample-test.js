@@ -65,6 +65,6 @@ describe("myToken", function () {
 
 //Workshop: 6) deploy contract and go to index.js to change contract address
 //Workshop: 7) add new token in MetaMask by current contract address ,test greet function again and see token balance
-//Workshop: 8) create function to connect your contract in "transterHardhat" function
+//Workshop: 8) create function to connect your contract in "transferHardhat" function
 //Workshop: 9) Test transfer function finshed!
 
