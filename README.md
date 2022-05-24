@@ -4,7 +4,7 @@ Before starting, you must install node module by `npm install`
 
 ### Step 1: Import Openzeppelin library
 
-Create MyToken.sol in hardhat_simaple_contract/contracts and import Openzeppelin library.
+Create `MyToken.sol` in `hardhat_simaple_contract/contracts` and import Openzeppelin library.
 
 ```solidity
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
@@ -51,7 +51,7 @@ contract myToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
 ### Step 3: Import your minting token contract to main contract
 
-Import MyToken.sol to Greeter.sol
+Import MyToken.sol to `Greeter.sol`
 
 ```solidity
 import "./myToken.sol";
@@ -80,9 +80,11 @@ describe("myToken", function () {
 });
 ```
 
+Before to next step. You must change private key to your private key (In this case is Metamask Wallet) in `.secret` file
+
 ### Step 5: Write transfer contract testing and run
 
-In sample-test.js. Try to test your transfer token function from solidity.
+In `sample-test.js`. Try to test your transfer token function from solidity.
 
 ```javascript
 describe("myToken", function () {
@@ -115,12 +117,30 @@ After you had successed on step 4-5. Change the current working directory to har
 
 Deploy contract and go to index.js to change contract address.
 
-`npx hardhat run scripts/sample-script.js --network ropsten`
-
-After deploy had successful. Go to index page and change contract address.
+In `hardhat.config.js`. Change network url to your Infura API key url.
 
 ```javascript
+module.exports = {
+  solidity: "0.8.4",
+  networks: {
+    ropsten: {
+      url: "https://ropsten.infura.io/v3/<YOUR_INFURA_API_KEY>", //Infura url with projectId
+      accounts: [mnemonic] // add the account that will deploy the contract (private key)
+     },
+  }
+};
+```
+
+After that. run `npx hardhat run scripts/sample-script.js --network ropsten` and go to index page and change contract address and Infura API Key.
+
+- Contract address
+```javascript
 const dev_contractAddress = framework == 'truffle' ? <YOUR_CONTRACT_ADDRESS_WITH_TRUFFLE> : <YOUR_CONTRACT_ADDRESS_WITH_HARDHAT>;
+```
+
+- Infura API Key
+```javascript
+const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/<YOUR_INFURA_API_KEY_WSS>";
 ```
 
 ### Step 7: Add Token and Test Greet function
