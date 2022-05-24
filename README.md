@@ -59,7 +59,7 @@ import "./myToken.sol";
 
 ### Step 4: Write Mint Token contract testing
 
-In sample-test.js. Try to test your Mint token and send coin to owner function from solidity.
+In `sample-test.js`. Try to test your Mint token and send coin to owner function from solidity.
 
 ```javascript
 describe("myToken", function () {
@@ -149,7 +149,7 @@ Start your node to run website by open new terminal and run `npm run dev`
 
 After that. Add new token in MetaMask by current contract address, test greet function on website again and see token balance.
 
-### Step 8: Write transfer function
+### Step 8: Write transfer function to call your contract
 
 Add sendTransaction method to "transferHardhat" function by this code.
 
@@ -182,3 +182,5 @@ async function transferHardhat() {
     }
   }
 ```
+
+### Finshed! you can try to fill other wallet address and send your token! Have a nice day :D
