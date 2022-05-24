@@ -25,7 +25,7 @@ module.exports = {
   solidity: "0.8.4",
   networks: {
     ropsten: {
-      url: "https://ropsten.infura.io/v3/d9f6612bddb449d2b8fc8db70f50adf0", //Infura url with projectId
+      url: "https://ropsten.infura.io/v3/", //Infura url with projectId
       accounts: [mnemonic] // add the account that will deploy the contract (private key)
      },
   }

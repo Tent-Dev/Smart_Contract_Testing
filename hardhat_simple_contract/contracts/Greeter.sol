@@ -2,9 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+
 //Workshop: 3) Import myToken.sol
-import "./myToken.sol";
-//----- End of Workshop: 3) Import openzeppelin -----
+
+//----- End of Workshop: 3) Import myToken.sol -----
 
 contract Greeter is myToken {
     string private greeting;

@@ -23,21 +23,13 @@ function Index() {
   const [receiverAddress, setReceiverAddress] = useState(null);
   const [transferAmount, setTransferAmount] = useState(0);
 
-  // env
-  // test
-  const test_contractAddress = framework == 'truffle' ? "0xAefA43C5b50710e376f7BD1596a247e134215548" : "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-  const test_WalletAddress = framework == 'truffle' ? "0xE83CC64373912Bf2e2093702E8a25D0C6fa87846" : "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-  // const test_WalletAddress = "0x2a06a95A601276570d5375Bad22637C72A5226B5";
-  const test_web3Connect = framework == 'truffle' ? "http://localhost:7545" : "ws://localhost:8545" ;
-  // Dev
-  const dev_contractAddress = framework == 'truffle' ? "0x8Cc37C15B6590145f351361dcb35d499cf2CFa8C" : "0x6B4354492C9093fC1E7Ef5C68B751C15e0051e90";
-  const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/6a33721938864557ad8f30daac2ccf63";
-  // End of env
-
+  const dev_contractAddress = framework == 'truffle' ? "" : "";
+  const dev_web3Connect = "";
+  
   let testLocal = false;
 
-  let contractAddress = testLocal ? test_contractAddress : dev_contractAddress;
-  let web3Connect = testLocal ? test_web3Connect : dev_web3Connect;
+  let contractAddress = testLocal ? "" : dev_contractAddress;
+  let web3Connect = testLocal ? "" : dev_web3Connect;
 
   var contractJson = require('../simple_contract/build/contracts/Tent_Token.json');
   var contractJsonHardhat = require('../hardhat_simple_contract/artifacts/contracts/Greeter.sol/Greeter.json');
@@ -1101,17 +1093,6 @@ function Index() {
       <Navbar.Brand href="#home">Tent Token</Navbar.Brand>
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />
       <Navbar.Collapse id="responsive-navbar-nav" style={{justifyContent: 'right'}}>
-        {/* <Nav className="me-auto">
-          <Nav.Link href="#features">Features</Nav.Link>
-          <Nav.Link href="#pricing">Pricing</Nav.Link>
-          <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
-            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-          </NavDropdown>
-        </Nav> */}
         <Nav>
           <Nav.Link>{address ? address : <div onClick={setContractInit}>Connect Wallet</div>}</Nav.Link>
         </Nav>
