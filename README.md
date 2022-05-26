@@ -1,6 +1,6 @@
 # Workshop: Create your first contract!, first token! and first dApps! 
 
-First, Clone this repo to your project by `git clone --branch Workshop_dApps https://github.com/Tent-Dev/Smart_Contract_Testing.git`
+First, Clone this repo to your project by `git clone --branch Workshop_dApps https://github.com/Tent-Dev/Smart_Contract_Testing.git` and Change the current working directory to Workshop by `cd .\Smart_Contract_Testing\`
 
 
 Before starting, you must install node module by `npm install`
