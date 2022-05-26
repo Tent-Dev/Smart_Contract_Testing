@@ -28,5 +28,9 @@ module.exports = {
       url: "https://ropsten.infura.io/v3/", //Infura url with projectId
       accounts: [mnemonic] // add the account that will deploy the contract (private key)
      },
+    rinkeby: {
+    url: "https://rinkeby.infura.io/v3/", //Infura url with projectId
+    accounts: [mnemonic] // add the account that will deploy the contract (private key)
+    },
   }
 };
