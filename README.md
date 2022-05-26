@@ -130,13 +130,17 @@ module.exports = {
       url: "https://ropsten.infura.io/v3/<YOUR_INFURA_API_KEY>", //Infura url with projectId
       accounts: [mnemonic] // add the account that will deploy the contract (private key)
      },
+     rinkeby: {
+      url: "https://rinkeby.infura.io/v3/<YOUR_INFURA_API_KEY>", //Infura url with projectId
+      accounts: [mnemonic] // add the account that will deploy the contract (private key)
+     },
   }
 };
 ```
 
-After that. run `npx hardhat run scripts/sample-script.js --network ropsten` and go to index page and change contract address and Infura API Key.
+After that. run `npx hardhat run scripts/sample-script.js --network rinkeby` and go to index page and change contract address and Infura API Key.
 
-*If you can't deploy the contract because not enough gas fee. Please get ETH on Ropsten network : https://app.mycrypto.com/faucet go to "Tools" menu and click "Use Testnet Faucet"
+*If you can't deploy the contract because not enough gas fee. Please get ETH on Rinkeby network : https://rinkebyfaucet.com
 
 - Contract address
 ```javascript
@@ -145,7 +149,7 @@ const dev_contractAddress = framework == 'truffle' ? <YOUR_CONTRACT_ADDRESS_WITH
 
 - Infura API Key
 ```javascript
-const dev_web3Connect = "wss://ropsten.infura.io/ws/v3/<YOUR_INFURA_API_KEY_WSS>";
+const dev_web3Connect = "wss://rinkeby.infura.io/ws/v3/<YOUR_INFURA_API_KEY_WSS>";
 ```
 
 ### Step 7: Add Token and Test Greet function
