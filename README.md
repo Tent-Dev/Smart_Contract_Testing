@@ -136,6 +136,8 @@ module.exports = {
 
 After that. run `npx hardhat run scripts/sample-script.js --network ropsten` and go to index page and change contract address and Infura API Key.
 
+*If you can't deploy the contract because not enough gas fee. Please get ETH on Ropsten network : https://app.mycrypto.com/faucet go to "Tools" menu and click "Use Testnet Faucet"
+
 - Contract address
 ```javascript
 const dev_contractAddress = framework == 'truffle' ? <YOUR_CONTRACT_ADDRESS_WITH_TRUFFLE> : <YOUR_CONTRACT_ADDRESS_WITH_HARDHAT>;
