@@ -59,6 +59,15 @@ Import MyToken.sol to `Greeter.sol`
 ```solidity
 import "./myToken.sol";
 ```
+and Add "is myToken" to Greeter constract here
+
+```solidity
+contract Greeter is myToken {
+...
+...
+...
+}
+```
 
 ### Step 4: Write Mint Token contract testing
 
