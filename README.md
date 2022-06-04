@@ -114,7 +114,7 @@ describe("myToken", function () {
 });
 ```
 
-After you had successed on step 4-5. Change the current working directory to hardhat_simple_contract by `cd .\hardhat_simple_contract\`, run `npm install --save --dev hardhat` and try to run `npx hardhat test` for testing.
+After you had successed on step 4-5. Change the current working directory to hardhat_simple_contract by `cd .\hardhat_simple_contract\`, run `npm install --save-dev hardhat` and try to run `npx hardhat test` for testing.
 
 ### Step 6: Deploy contract
 
