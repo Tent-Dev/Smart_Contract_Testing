@@ -5,54 +5,30 @@ First, Clone this repo to your project by `git clone --branch Workshop_dApps htt
 
 Before starting, you must install node module by `npm install`
 
-### Step 1: Import Openzeppelin library
+### Step 1: Create First your Token contract
 
-Create `MyToken.sol` in `hardhat_simaple_contract/contracts` and import Openzeppelin library.
-
-```solidity
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol';
-import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
-```
-
-
-
-### Step 2: Create First your Token contract
-
-After that. write minting token contract by openzeppelin template
+Create `MyToken.sol` in `hardhat_simaple_contract/contracts` After that. write minting token contract by openzeppelin template
 
 ```solidity
-contract myToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    //Custom your token here
-    constructor() ERC20('Hardhat Token', 'HHT') ERC20Permit('MyGovernanceToken'){
-        _mint(msg.sender, 1e8 * 10**decimals());
-    }
-    //----- End of Custom your token here -----
-
-    function _afterTokenTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) internal override(ERC20, ERC20Votes) {
-        super._afterTokenTransfer(_from, _to, _amount);
+contract MyToken is ERC20, ERC20Burnable, Ownable {
+    constructor() ERC20("MyToken", "MTK") {
+        _mint(msg.sender, 100000 * 10 ** decimals());
     }
 
-    function _mint(address _to, uint256 _amount) internal override(ERC20, ERC20Votes) {
-        super._mint(_to, _amount);
-    }
-
-    function _burn(address _account, uint256 _amount) internal override(ERC20, ERC20Votes) {
-        super._burn(_account, _amount);
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
 }
 ```
 
-### Step 3: Import your minting token contract to main contract
+### Step 2: Import your minting token contract to main contract
 
 Import MyToken.sol to `Greeter.sol`
 
@@ -68,6 +44,10 @@ contract Greeter is myToken {
 ...
 }
 ```
+
+### Step 3: Try to compile your contract
+
+Run `npx hardhat compile`
 
 ### Step 4: Write Mint Token contract testing
 
